@@ -1,0 +1,1 @@
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.5 order_analyser_v1.py 18.211.252.152 9092 real-time-project
