@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+import pyspark.sql.functions as f
 
 spark = SparkSession  \
 	.builder  \
@@ -8,12 +9,20 @@ spark = SparkSession  \
 	.getOrCreate()
 spark.sparkContext.setLogLevel('ERROR')	
 
-orders_schema = StructType() \
-    .add("invoice_no", StringType()) \
-    .add("country", StringType()) \
-    .add("timestamp", StringType()) \
-    .add("type", StringType()) \
-    .add("items", ArrayType(StringType(), StructType().add(...)))
+orders_schema = StructType([
+                    StructField("invoice_no", StringType()),
+                    StructField("country", StringType()),
+                    StructField("timestamp", StringType()),
+                    StructField("type", StringType()),
+                    StructField("items", ArrayType(
+                        StructType([
+                            StructField("SKU", StringType()),
+                            StructField("title", StringType()),
+                            StructField("unit_price", StringType()),
+                            StructField("quantity", StringType())
+                        ])
+                    ))
+])
 
 df = spark  \
 	.readStream  \
@@ -24,19 +33,9 @@ df = spark  \
 	.load() \
     .select(from_json(col("value").cast("string"), orders_schema).alias("orders"))
 
+df1 = df.select("orders.*",explode("orders.items"))
 
-df2 = df \
-    .select(explode("orders.items")) \
-    .select("value.*") \
-    .writeStream \
-    .outputMode("append") \
-    .format("console") \
-    .option("truncate", "false") \
-    .trigger(processingTime = "1 minute") \
-    .start()
-
-df2.awaitTermination()
-
+df1 = df1.select("invoice_no", "country", "timestamp", "type", "col.*")
 
 
 query = df \

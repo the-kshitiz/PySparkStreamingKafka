@@ -36,6 +36,26 @@ df = spark  \
 df1 = df.select("orders.*",explode("orders.items"))
 
 df1 = df1.select("invoice_no", "country", "timestamp", "type", "col.*")
+df1 = df1.withColumn("total_cost", (col("unit_price") * col("quantity")))
+def returncheck(text):
+    if text == "RETURN":
+        return 1
+    else:
+        return 0
+
+returncheckudf = udf(lambda t: returncheck(t), IntegerType())
+
+df1= df1.withColumn("is_return", returncheckudf(df1.type))
+
+def ordercheck(text):
+    if text == "ORDER":
+        return 1
+    else:
+        return 0
+
+ordercheckudf = udf(lambda t: ordercheck(t), IntegerType())
+
+df1= df1.withColumn("is_order", ordercheckudf(df1.type))
 
 df2 = df1 \
     .writeStream \
