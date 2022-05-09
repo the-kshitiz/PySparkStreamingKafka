@@ -18,7 +18,7 @@ orders_schema = StructType([
                         StructType([
                             StructField("SKU", StringType()),
                             StructField("title", StringType()),
-                            StructField("unitprice", StringType()),
+                            StructField("unit_price", StringType()),
                             StructField("quantity", StringType())
                         ])
                     ))
@@ -36,9 +36,6 @@ df = spark  \
 df1 = df.select("orders.*",explode("orders.items"))
 
 df1 = df1.select("invoice_no", "country", "timestamp", "type", "col.*")
-
-df1 = df1.withColumn('Price', f.regexp_replace('unitprice',',',''))
-
 
 df2 = df1 \
     .writeStream \
