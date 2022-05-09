@@ -39,7 +39,7 @@ df1 = df1.select("invoice_no", "country", "timestamp", "type", "col.*")
 
 
 query = df \
-    .select("invoice no", "country", "total_items", "is_order", "is_return") \
+    .select("invoice_no", "country", "total_items", "is_order", "is_return") \
     .writeStream \
     .outputMode("append") \
     .format("console") \
